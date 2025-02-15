@@ -13,38 +13,54 @@ router.get('/', async (req, res, next) => {
 })
 
 router.post('/', async (req, res, next) => {
-    const messages = await controller.createActivity(req.body)
-    .catch((error) => next(new BadRequestError(error)),);
-
-    return res.send(messages);
-})
+    try {
+        const createdActivity = await controller.createActivity(req.body);
+        return res.status(201).send(createdActivity);
+    } catch (error) {
+        // Ensure error is a string or has a message property
+        const message = error instanceof Error ? error.message : String(error);
+        return next(new BadRequestError(message));
+    }
+});
 
 router.put('/', async (req, res, next) => {
-    const messages = await controller.updateActivity(req.body)
-    .catch((error) => next(new BadRequestError(error)),);
+    try {
+        const updatedActivity = await controller.updateActivity(req.body);
+        return res.send(updatedActivity);
+    } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        return next(new BadRequestError(message));
+    }
+});
 
-    return res.send(messages);
-})
 
-router.post('/:clientId', async (req, res, next) => { 
-    const messages = await controller.getActivitiesByClient(req.body.clientId)
+
+router.get('/:clientId', async (req, res, next) => { 
+    const messages = await controller.getActivitiesByClient(req.params.clientId)
     .catch((error) => next(new BadRequestError(error)),);
 
     return res.send(messages);
 })
 
 router.post('/:clientId', async (req, res, next) => {
-    const messages = await controller.getAddressesUsedbyClient(req.body.clientId)
+    const messages = await controller.getAddressesUsedByClient(req.body.clientId)
     .catch((error) => next(new BadRequestError(error)),);
 
     return res.send(messages);
 })
 
-router.post('/:clientId', async (req, res, next) => {
+router.post('/:clientId/contacts', async (req, res, next) => {
     const messages = await controller.addContactsToActivity(req.body)
     .catch((error) => next(new BadRequestError(error)),);
 
     return res.send(messages);
-})
+});
+
+router.get('/activity/:id', async (req, res, next) => { 
+    const activity = await controller.getActivityById(req.params.id)
+    .catch((error) => next(new BadRequestError(error)),);
+
+    return res.send(activity);
+});
 
 export default router;

@@ -20,7 +20,7 @@ router.put('/', async (req, res, next) => {
     })
 
 router.get('/:clientId', async (req, res, next) => {
-    const messages = await controller.getAddressById(req.body.clientId)
+    const messages = await controller.getAddressById(req.params.clientId)
     .catch((error) => next(new BadRequestError(error)),);
 
     return res.send(messages);

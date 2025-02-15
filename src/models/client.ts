@@ -12,19 +12,6 @@ class Client extends Model<InferAttributes<Client>, InferCreationAttributes<Clie
         declare createdAt: CreationOptional<Date>;
         declare updatedAt: CreationOptional<Date>;
 
-/*      declare addressId: ForeignKey<Address['id']>; */
-
-/*      declare getAddresses: HasManyGetAssociationsMixin<Address>; // Note the null assertions!
-        declare addAddress: HasManyAddAssociationMixin<Address, number>;
-        declare addAddresses: HasManyAddAssociationsMixin<Address, number>;
-        declare setAddresses: HasManySetAssociationsMixin<Address, number>;
-        declare removeAddress: HasManyRemoveAssociationMixin<Address, number>;
-        declare removeAddresses: HasManyRemoveAssociationsMixin<Address, number>;
-        declare hasAddress: HasManyHasAssociationMixin<Address, number>;
-        declare hasAddresses: HasManyHasAssociationsMixin<Address, number>;
-        declare countAddresss: HasManyCountAssociationsMixin;
-        declare createAddress: HasManyCreateAssociationMixin<Address, 'clientId'>; 
-*/
         declare createAddress: HasOneCreateAssociationMixin<Address>;
         declare getAddress: HasOneGetAssociationMixin<Address>;
         declare getActivities: HasManyGetAssociationsMixin<Activity>;
@@ -36,7 +23,7 @@ class Client extends Model<InferAttributes<Client>, InferCreationAttributes<Clie
 Client.init(
         {
         id: {
-            type: DataTypes.UUID,
+            type: DataTypes.UUID, 
             primaryKey: true,
             defaultValue: DataTypes.UUIDV4,
         },

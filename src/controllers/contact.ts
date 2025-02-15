@@ -1,52 +1,87 @@
-import { Contact, Client, Activity_Contacts } from "../models";
+import { Contact, Client, Activity_Contacts, Activity } from "../models";
 import { CustomError } from "../utils/error";
 
 // GET Contacts - all
 const getContacts = async (): Promise<Contact[]> => {
     return await Contact.findAll({
-        order: [['id', "ASC"]],
-    })
-}
+        order: [["id", "ASC"]],
+        include: [
+            {
+                model: Client,
+                as: "client"
+            },
+            {
+                model: Activity,
+                as: "activities"
+            }
+        ]
+    });
+};
 
 // GET Contact by Id
 const getContactById = async (contactId: Contact["id"]): Promise<Contact> => {
-    const _contact = await Contact.findByPk(contactId)
+    const _contact = await Contact.findByPk(contactId, {
+        include: [
+            {
+                model: Client,
+                as: "client"
+            },
+            {
+                model: Activity,
+                as: "activities"
+            }
+        ]
+    });
 
-    if(!_contact) {
+    if (!_contact) {
         throw new CustomError("Contact not found");
     }
     return _contact;
-}
+};
 
-//POST Contact
+// POST Contact
 const createContacts = async (contacts: [any]) => {
-
-    contacts.forEach(async element => {
-        let newContact = await Contact.create(element);
-        newContact.addActivity(element.activityId);
-        newContact.setClient(element.clientId);
+    const createPromises = contacts.map(async (element) => {
+        const newContact = await Contact.create(element);
+        if (element.activityId) {
+            await newContact.addActivity(element.activityId);
+        }
+        if (element.clientId) {
+            await newContact.setClient(element.clientId);
+        }
     });
-}
 
-//UPDATE Contact
-const updateContact = async (contact: any) => {
-    var contactParams: any = {};
-    if(contact.name) contactParams.name = contact.name;
-    if(contact.title) contactParams.title = contact.title;
-    if(contact.phone) contactParams.phone = contact.phone;
-    if(contact.email) contactParams.email = contact.email;
+    await Promise.all(createPromises);
+};
 
-    await Contact.update( contactParams, {
-        where: {
-          id: contact.contactId
-        },
-      });
-}
+// UPDATE Contact
+const updateContacts = async (contacts: [any]) => {
+    try {
+        const updatePromises = contacts.map(async (contact) => {
+            const { contactId, name, title, phone, email } = contact;
+            const updateFields: any = {};
 
+            if (name) updateFields.name = name;
+            if (title) updateFields.title = title;
+            if (phone) updateFields.phone = phone;
+            if (email) updateFields.email = email;
+
+            return Contact.update(updateFields, {
+                where: { id: contactId }
+            });
+        });
+
+        await Promise.all(updatePromises);
+
+        return { message: "Contacts updated successfully" };
+    } catch (error: any) {
+        throw new CustomError(`Failed to update contacts: ${error.message}`);
+    }
+};
 
 export default {
-    getContacts: getContacts,
-    getContactById: getContactById,
-    createContacts: createContacts,
-    updateContact: updateContact
-}
+    getContacts,
+    getContactById,
+    createContacts,
+    updateContacts
+};

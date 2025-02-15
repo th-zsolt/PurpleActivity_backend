@@ -18,25 +18,39 @@ router.post('/', async (req, res, next) => {
     return res.send(messages);
 })
 
-router.put('/', async (req, res, next) => {
-    const messages = await controller.updateContact(req.body)
+/* router.put('/', async (req, res, next) => {
+    const messages = await controller.updateContacts(req.body)
     .catch((error) => next(new BadRequestError(error)),);
 
     return res.send(messages);
-})
+}) */
 
-router.get('/:contactId/contact', async (req, res, next) => {
-    const messages = await controller.getContactById(req.body.contactId)
+    router.put('/', async (req, res, next) => {
+        try {
+            const messages = await controller.updateContacts(req.body);
+            return res.send(messages);
+        } catch (error) {
+            if (error instanceof Error) {
+                next(new BadRequestError(error.message));
+            } else {
+                next(new BadRequestError('An unknown error occurred'));
+            }
+        }
+    });
+
+
+router.get('/:contactId', async (req, res, next) => {
+    const messages = await controller.getContactById(req.params.contactId)
     .catch((error) => next(new BadRequestError(error)),);
 
     return res.send(messages);
     })
 
-router.get('/:clientId', async (req, res, next) => {
+/* router.get('/:clientId', async (req, res, next) => {
     const messages = await controller.getContactById(req.body.clientId)
     .catch((error) => next(new BadRequestError(error)),);
 
     return res.send(messages);
-    })
+    }) */
 
 export default router;
